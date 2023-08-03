@@ -18,22 +18,6 @@ export const Text = styled.div`
     font-family: cursive;
     cursor: pointer;
 `
-// export const Field = styled.div`    
-//     width:700px;
-//     height:700px;
-//     display:grid;
-//     border: 3px solid;
-//     grid-template-columns: repeat(3, 1fr);
-//     grid-auto-rows: 1fr;
-// `
-// export const Square = styled.div`
-//     display:grid;
-//     border: 2px solid;
-//     align-items:center; 
-//     justify-content:center;
-//     grid-template-columns: repeat(3, 1fr);
-//     grid-auto-rows: 1fr;
-// `
 export const Field = styled.div`    
     width:500px;
     height:500px;
