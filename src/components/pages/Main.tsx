@@ -1,94 +1,50 @@
-import {HtmlWrapper,Text,Field,Square,Item,NumbersDiv,Numbers} from "../../styles/Main";
+import {HtmlWrapper,Text,Field,Square,Item,NumbersDiv,Numbers,MiniText,MiniTextDiv} from "../../styles/Main";
 import { useState, useEffect } from "react";
+import {generateSudokuTable,fillRandomValues} from "./Generator"
 
-//исходные данные
-const NUMBERS = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-const TABLE = [
-    [5, 3, 0, 0, 7, 0, 0, 0, 0],
-    [6, 0, 0, 1, 9, 5, 0, 0, 0],
-    [0, 9, 8, 0, 0, 0, 0, 6, 0],
-    [8, 0, 0, 0, 6, 0, 0, 0, 3],
-    [4, 0, 0, 8, 0, 3, 0, 0, 1],
-    [7, 0, 0, 0, 2, 0, 0, 0, 6],
-    [0, 6, 0, 0, 0, 0, 2, 8, 0],
-    [0, 0, 0, 4, 1, 9, 0, 0, 5],
-    [0, 0, 0, 0, 8, 0, 0, 7, 9],
-];
-const TABLE1 = [
-    [0, 0, 8, 0, 3, 0, 5, 4, 0],
-    [3, 0, 0, 4, 0, 7, 9, 0, 0],
-    [4, 1, 0, 0, 0, 8, 0, 0, 2],
-    [0, 4, 3, 5, 0, 2, 0, 6, 0],
-    [5, 0, 0, 0, 0, 0, 0, 0, 8],
-    [0, 6, 0, 3, 0, 9, 4, 1, 0],
-    [1, 0, 0, 8, 0, 0, 0, 2, 7],
-    [0, 0, 5, 6, 0, 3, 0, 0, 4],
-    [0, 2, 9, 0, 7, 0, 8, 0, 0]
-];
-const TABLE2 = [
-    [6, 0, 0, 1, 0, 8, 2, 0, 3],
-    [0, 2, 0, 0, 4, 0, 0, 9, 0],
-    [8, 0, 3, 0, 0, 5, 4, 0, 0],
-    [5, 0, 4, 6, 0, 7, 0, 0, 9],
-    [0, 3, 0, 0, 0, 0, 0, 5, 0],
-    [7, 0, 0, 8, 0, 3, 1, 0, 2],
-    [0, 0, 1, 7, 0, 0, 9, 0, 6],
-    [0, 8, 0, 0, 3, 0, 0, 2, 0],
-    [3, 0, 2, 9, 0, 4, 0, 0, 5]
-];
-
-//функция для решения судоку (работает только на простых вариантов с одним решением)
-function Sudoku_Solution(solution: number[][]) {
-    const puzzle = solution.map((row) => [...row]);
-
-    while (true) {
-        //все клетки заполнены вернем решение
-        if (puzzle.every((row) => row.every((cell) => cell))) {return puzzle;}
-
-        for (let i = 0; i < 9; i++) {
-            for (let j = 0; j < 9; j++) {
-                if (puzzle[i][j] !== 0) continue
-
-                let numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-                let row = puzzle[i];
-                let column = puzzle.map((r) => r[j]);
-
-                let ii = Math.floor(i / 3) * 3;
-                let jj = Math.floor(j / 3) * 3;
-                let square = puzzle.slice(ii, ii + 3).map((r) => r.slice(jj, jj + 3)).flat();
-
-                //удаляем числа, которые уже есть
-                [row, column, square].forEach((arr) => {numbers = numbers.filter((n) => !arr.includes(n));});
-                
-                //если осталось одно число, ставим в текущюю клетку
-                if (numbers.length === 1) puzzle[i][j] = numbers[0]
-            }
-        }
-    }
-}
-
-//решенная судоку
-const sudokuTableSolution: number[][] = Sudoku_Solution(TABLE)
+const NUMBERS = [1, 2, 3, 4, 5, 6, 7, 8, 9];//массив чисел для кликов
+var sudokuTableSolution = generateSudokuTable()//судоку решенная
+var sudokuTableCell = fillRandomValues(sudokuTableSolution,40)//судоку не решенная
 
 function Main() {
-  const [sudokuTable, setSudokuTable] = useState<number[][]>(TABLE); //заполняемая судоку
+  const [N, setN] = useState<number>(40);//уровень сложности
+  const [sudokuTable, setSudokuTable] = useState<number[][]>(sudokuTableCell); //заполняемая судоку
   const [sudokuItem, setSudokuItem] = useState<string>("");//текущий индекс заполняемого поля
-  const [restartCount, setRestartCount] = useState(0); //новая игра
+  const [gameOver, setGameOver] = useState(N); //новая игра (количество заполненных клеток) надо 81
+
+  //смена сложности
+  function ChangeN(count: number){
+    setN(count)
+  }
+  //при смене сложности
+  useEffect(() => {      
+    Restart();
+    Element("Easy")?.style?.setProperty("color", N === 40 ? "red" : "black");
+    Element("Medium")?.style?.setProperty("color", N === 30 ? "red" : "black");
+    Element("Hard")?.style?.setProperty("color", N === 20 ? "red" : "black");
+  }, [N]);
 
   //получаем элемент для изменения стилей
   function Element(index: string) {
     return document.getElementById(index);
   }
-
-  //если началась новая игра
-  useEffect(() => {
-    setSudokuTable(JSON.parse(JSON.stringify(TABLE))); 
-    setSudokuItem("");
-  }, [restartCount]);
-
+  
   //новая игра
   function Restart() {
-    setRestartCount(restartCount + 1);
+    sudokuTableSolution = generateSudokuTable()//новая судоку решенная
+    sudokuTableCell = fillRandomValues(sudokuTableSolution,N)//новая судоку не решенная
+    setSudokuTable(sudokuTableCell)//сброс текущей судоку
+    setSudokuItem("")//сброс текущего индекса
+    setGameOver(N)//сброс количества заполненных клеток
+    const text = document.getElementById("text");
+    if (text) {
+      text.textContent = "Sudoku Game";
+    }
+    for (let i = 0; i < sudokuTable.length; i++) {
+      for (let j = 0; j < sudokuTable[i].length; j++) {
+          Element(i + "_" + j)?.style?.setProperty("color", "black");
+      }
+  }
   }
 
   //пользователь нажал на выбранное поле
@@ -115,7 +71,10 @@ function Main() {
         setSudokuTable(newSudokuTable); 
 
         Element(i + "_" + j)?.style?.setProperty("background-color", "#B0C4DE");
-        if (sudokuTable[i][j]===sudokuTableSolution[i][j]) Element(i + "_" + j)?.style?.setProperty("color", "blue");
+        if (sudokuTable[i][j]===sudokuTableSolution[i][j]) {
+          Element(i + "_" + j)?.style?.setProperty("color", "blue");
+          setGameOver(gameOver+1)
+        }
         else Element(i + "_" + j)?.style?.setProperty("color", "red");     
     }
   } 
@@ -129,11 +88,22 @@ function Main() {
       }
     }    
     Element(sudokuItem)?.style?.setProperty("background-color", "#B0C4DE");
+    if (gameOver===81) {
+      const text = document.getElementById("text");
+      if (text) {
+        text.textContent = "Congratulations!!!";
+      }
+    }
   }, [sudokuTable]);
 
   return (
     <HtmlWrapper>
-      <Text>Sudoku Game</Text>
+      <Text id="text">Sudoku Game</Text>
+      <MiniTextDiv>
+        <MiniText id="Easy" onClick={()=>ChangeN(40)}>Easy</MiniText>
+        <MiniText id="Medium" onClick={()=>ChangeN(30)}>Medium</MiniText>
+        <MiniText id="Hard" onClick={()=>ChangeN(20)}>Hard</MiniText>
+      </MiniTextDiv>
       <Field>
         {sudokuTable.map((row, rowIndex) => (
           <Square key={rowIndex}>
@@ -143,7 +113,7 @@ function Main() {
           </Square>
         ))}
       </Field>
-      <Text onClick={() => Restart()}>Restart</Text>
+      <Text onClick={() => Restart()}>New Game</Text>
       <NumbersDiv>
         {NUMBERS.map((value, idx) => (
           <Numbers key={idx} id={String(value)} onClick={() => NumberClick(value)}>{value}</Numbers>

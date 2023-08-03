@@ -11,12 +11,24 @@ export const HtmlWrapper = styled.div`
 `
 export const Text = styled.div`
     width:auto;
-    font-size: 40px;
-    margin-top: 25px;
-    margin-bottom: 25px;
+    font-size: 30px;
+    margin-top: 20px;
+    margin-bottom: 20px;
     text-align: center;
     font-family: cursive;
     cursor: pointer;
+`
+export const MiniTextDiv = styled.div`    
+    display:flex;
+    flex-direction:row;
+    justify-content:center;
+    align-items:center;
+    align-self:center;
+    gap: 50px;
+`
+export const MiniText = styled(Text)`
+    margin-top: -15px;
+    font-size: 20px;
 `
 export const Field = styled.div`    
     width:500px;
@@ -56,7 +68,7 @@ export const NumbersDiv = styled.div`
     display:grid;
     grid-template-columns: repeat(9, 1fr);
     gap: 40px;
-    margin-top:25px;
+    margin-top:20px;
 `
 export const Numbers = styled.div` 
     display:flex;
